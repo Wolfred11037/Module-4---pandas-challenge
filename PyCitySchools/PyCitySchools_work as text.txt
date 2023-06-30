@@ -1,0 +1,392 @@
+#Local Government Area Summary, area_summary
+
+# Normal Setup
+import pandas as pd
+from pathlib import Path
+
+# Loading CSV files, having trouble, found soluton with r. will fix if have time. 
+school_data_file = Path(r"C:\Users\Wolfred\Documents\Data Analysis Boot Camp\Week 4\PyCitySchools\Resources\schools_complete.csv")
+student_data_file = Path(r"C:\Users\Wolfred\Documents\Data Analysis Boot Camp\Week 4\PyCitySchools\Resources\students_complete.csv")
+
+school_data = pd.read_csv(school_data_file)
+student_data = pd.read_csv(student_data_file)
+
+# Calculating total number of schools
+total_schools = school_data['school_name'].nunique()
+
+# Calculating total number of students
+total_students = student_data['Student ID'].nunique()
+
+# Calculating the budget
+total_budget = school_data['budget'].sum()
+
+# average math score
+average_math_score = student_data['maths_score'].mean()
+
+# average reading score
+average_reading_score = student_data['reading_score'].mean()
+
+# % of student passing math
+passing_math_percentage = (student_data[student_data['maths_score'] >= 50]['Student ID'].nunique() / total_students) * 100
+
+# % of student passing reading
+passing_reading_percentage = (student_data[student_data['reading_score'] >= 50]['Student ID'].nunique() / total_students) * 100
+
+# % of student passing math and reading
+overall_passing_percentage = (student_data[(student_data['maths_score'] >= 50) & (student_data['reading_score'] >= 50)]['Student ID'].nunique() / total_students) * 100
+
+# declaring the rseults
+data = {
+    'Total Schools': [total_schools],
+    'Total Students': [total_students],
+    'Total Budget': [total_budget],
+    'Average Math Score': [average_math_score],
+    'Average Reading Score': [average_reading_score],
+    '% Passing Math': [passing_math_percentage],
+    '% Passing Reading': [passing_reading_percentage],
+    '% Overall Passing': [overall_passing_percentage]
+}
+
+results_df = pd.DataFrame(data)
+
+# Formating into tabe
+results_df['Total Students'] = results_df['Total Students'].map('{:,}'.format)
+results_df['Total Budget'] = results_df['Total Budget'].map('${:,.2f}'.format)
+results_df['Average Math Score'] = results_df['Average Math Score'].map('{:.2f}'.format)
+results_df['Average Reading Score'] = results_df['Average Reading Score'].map('{:.2f}'.format)
+results_df['% Passing Math'] = results_df['% Passing Math'].map('{:.2f}%'.format)
+results_df['% Passing Reading'] = results_df['% Passing Reading'].map('{:.2f}%'.format)
+results_df['% Overall Passing'] = results_df['% Overall Passing'].map('{:.2f}%'.format)
+
+results_df
+
+
+
+#School Summary, per_school_summary
+
+import pandas as pd
+from pathlib import Path
+
+school_data_file = Path(r"C:\Users\Wolfred\Documents\Data Analysis Boot Camp\Week 4\PyCitySchools\Resources\schools_complete.csv")
+student_data_file = Path(r"C:\Users\Wolfred\Documents\Data Analysis Boot Camp\Week 4\PyCitySchools\Resources\students_complete.csv")
+
+school_data = pd.read_csv(school_data_file)
+student_data = pd.read_csv(student_data_file)
+
+# Calculating total number of students / school
+total_students = student_data.groupby('school_name')['Student ID'].count()
+
+# Calculating total budget of scholl
+total_budget = school_data.set_index('school_name')['budget']
+
+# Calculating student budget
+per_student_budget = total_budget / total_students
+
+# Calculating ave of math score
+average_math_score = student_data.groupby('school_name')['maths_score'].mean()
+
+# Calculate ave of reading score
+average_reading_score = student_data.groupby('school_name')['reading_score'].mean()
+
+# % of student passing math
+passing_math_percentage = (student_data[student_data['maths_score'] >= 50].groupby('school_name')['Student ID'].count() / total_students) * 100
+
+# % of student passing reading
+passing_reading_percentage = (student_data[student_data['reading_score'] >= 50].groupby('school_name')['Student ID'].count() / total_students) * 100
+
+# % of student passing math and reading
+overall_passing_percentage = (student_data[(student_data['maths_score'] >= 50) & (student_data['reading_score'] >= 50)].groupby('school_name')['Student ID'].count() / total_students) * 100
+
+# declaring the rseults
+results_df = pd.DataFrame({
+    'School Type': school_data.set_index('school_name')['type'],
+    'Total Students': total_students,
+    'Total School Budget': total_budget,
+    'Per Student Budget': per_student_budget,
+    'Average Math Score': average_math_score,
+    'Average Reading Score': average_reading_score,
+    '% Passing Math': passing_math_percentage,
+    '% Passing Reading': passing_reading_percentage,
+    '% Overall Passing': overall_passing_percentage
+})
+
+# the table
+results_df['Total Students'] = results_df['Total Students'].map('{:,}'.format)
+results_df['Total School Budget'] = results_df['Total School Budget'].map('${:,.2f}'.format)
+results_df['Per Student Budget'] = results_df['Per Student Budget'].map('${:,.2f}'.format)
+
+results_df
+
+
+#Top Performing Schools (By % Overall Passing), top_schools
+
+import pandas as pd
+from pathlib import Path
+
+school_data_file = Path(r"C:\Users\Wolfred\Documents\Data Analysis Boot Camp\Week 4\PyCitySchools\Resources\schools_complete.csv")
+student_data_file = Path(r"C:\Users\Wolfred\Documents\Data Analysis Boot Camp\Week 4\PyCitySchools\Resources\students_complete.csv")
+
+school_data = pd.read_csv(school_data_file)
+student_data = pd.read_csv(student_data_file)
+
+# Calculating total number of students / school
+total_students = student_data.groupby('school_name')['Student ID'].count()
+
+# Calculating total budget of scholl
+total_budget = school_data.set_index('school_name')['budget']
+
+# Calculating student budget
+per_student_budget = total_budget / total_students
+
+# Calculating ave of math score
+average_math_score = student_data.groupby('school_name')['maths_score'].mean()
+
+# Calculate ave of reading score
+average_reading_score = student_data.groupby('school_name')['reading_score'].mean()
+
+# % of student passing math
+passing_math_percentage = (student_data[student_data['maths_score'] >= 50].groupby('school_name')['Student ID'].count() / total_students) * 100
+
+# % of student passing reading
+passing_reading_percentage = (student_data[student_data['reading_score'] >= 50].groupby('school_name')['Student ID'].count() / total_students) * 100
+
+# % of student passing math and reading
+overall_passing_percentage = (student_data[(student_data['maths_score'] >= 50) & (student_data['reading_score'] >= 50)].groupby('school_name')['Student ID'].count() / total_students) * 100
+
+# declaring the rseults
+results_df = pd.DataFrame({
+    'School Type': school_data.set_index('school_name')['type'],
+    'Total Students': total_students,
+    'Total School Budget': total_budget,
+    'Per Student Budget': per_student_budget,
+    'Average Math Score': average_math_score,
+    'Average Reading Score': average_reading_score,
+    '% Passing Math': passing_math_percentage,
+    '% Passing Reading': passing_reading_percentage,
+    '% Overall Passing': overall_passing_percentage
+})
+
+# Sorting the data by percent of passing, top five schools decending order
+top_performing_schools = results_df.sort_values('% Overall Passing', ascending=False).head(5)
+
+# the table
+top_performing_schools['Total Students'] = top_performing_schools['Total Students'].map('{:,}'.format)
+top_performing_schools['Total School Budget'] = top_performing_schools['Total School Budget'].map('${:,.2f}'.format)
+top_performing_schools['Per Student Budget'] = top_performing_schools['Per Student Budget'].map('${:,.2f}'.format)
+
+top_performing_schools
+
+
+#Bottom Performing Schools (By % Overall Passing), bottom_schools
+
+import pandas as pd
+from pathlib import Path
+
+school_data_file = Path(r"C:\Users\Wolfred\Documents\Data Analysis Boot Camp\Week 4\PyCitySchools\Resources\schools_complete.csv")
+student_data_file = Path(r"C:\Users\Wolfred\Documents\Data Analysis Boot Camp\Week 4\PyCitySchools\Resources\students_complete.csv")
+
+school_data = pd.read_csv(school_data_file)
+student_data = pd.read_csv(student_data_file)
+
+# Calculating total number of students / school
+total_students = student_data.groupby('school_name')['Student ID'].count()
+
+# Calculating total budget of scholl
+total_budget = school_data.set_index('school_name')['budget']
+
+# Calculating student budget
+per_student_budget = total_budget / total_students
+
+# Calculating ave of math score
+average_math_score = student_data.groupby('school_name')['maths_score'].mean()
+
+# Calculate ave of reading score
+average_reading_score = student_data.groupby('school_name')['reading_score'].mean()
+
+# % of student passing math
+passing_math_percentage = (student_data[student_data['maths_score'] >= 50].groupby('school_name')['Student ID'].count() / total_students) * 100
+
+# % of student passing reading
+passing_reading_percentage = (student_data[student_data['reading_score'] >= 50].groupby('school_name')['Student ID'].count() / total_students) * 100
+
+# % of student passing math and reading
+overall_passing_percentage = (student_data[(student_data['maths_score'] >= 50) & (student_data['reading_score'] >= 50)].groupby('school_name')['Student ID'].count() / total_students) * 100
+
+# declaring the rseults
+results_df = pd.DataFrame({
+    'School Type': school_data.set_index('school_name')['type'],
+    'Total Students': total_students,
+    'Total School Budget': total_budget,
+    'Per Student Budget': per_student_budget,
+    'Average Math Score': average_math_score,
+    'Average Reading Score': average_reading_score,
+    '% Passing Math': passing_math_percentage,
+    '% Passing Reading': passing_reading_percentage,
+    '% Overall Passing': overall_passing_percentage
+})
+
+# Sorting the data by percent of failing, the last five schools decending order
+worst_performing_schools = results_df.sort_values('% Overall Passing', ascending=True).head(5)
+
+# the table
+worst_performing_schools['Total Students'] = worst_performing_schools['Total Students'].map('{:,}'.format)
+worst_performing_schools['Total School Budget'] = worst_performing_schools['Total School Budget'].map('${:,.2f}'.format)
+worst_performing_schools['Per Student Budget'] = worst_performing_schools['Per Student Budget'].map('${:,.2f}'.format)
+
+worst_performing_schools
+
+
+#Maths Scores by Year, maths_scores_by_year
+
+import pandas as pd
+from pathlib import Path
+
+school_data_file = Path(r"C:\Users\Wolfred\Documents\Data Analysis Boot Camp\Week 4\PyCitySchools\Resources\schools_complete.csv")
+student_data_file = Path(r"C:\Users\Wolfred\Documents\Data Analysis Boot Camp\Week 4\PyCitySchools\Resources\students_complete.csv")
+
+school_data = pd.read_csv(school_data_file)
+student_data = pd.read_csv(student_data_file)
+
+# Create a row for each year levels 9 - 12
+year_9 = student_data.loc[student_data['year'] == 9, ['school_name', 'maths_score']].groupby('school_name')['maths_score'].mean()
+year_10 = student_data.loc[student_data['year'] == 10, ['school_name', 'maths_score']].groupby('school_name')['maths_score'].mean()
+year_11 = student_data.loc[student_data['year'] == 11, ['school_name', 'maths_score']].groupby('school_name')['maths_score'].mean()
+year_12 = student_data.loc[student_data['year'] == 12, ['school_name', 'maths_score']].groupby('school_name')['maths_score'].mean()
+
+# the table, of school name and the year results of math scors
+average_math_scores = pd.DataFrame({
+    'Year 9': year_9,
+    'Year 10': year_10,
+    'Year 11': year_11,
+    'Year 12': year_12
+})
+
+average_math_scores
+
+
+#Reading Score by Year, reading_scores_by_year
+
+import pandas as pd
+from pathlib import Path
+
+school_data_file = Path(r"C:\Users\Wolfred\Documents\Data Analysis Boot Camp\Week 4\PyCitySchools\Resources\schools_complete.csv")
+student_data_file = Path(r"C:\Users\Wolfred\Documents\Data Analysis Boot Camp\Week 4\PyCitySchools\Resources\students_complete.csv")
+
+school_data = pd.read_csv(school_data_file)
+student_data = pd.read_csv(student_data_file)
+
+# Create a row for each year levels 9 - 12
+year_9 = student_data.loc[student_data['year'] == 9, ['school_name', 'reading_score']].groupby('school_name')['reading_score'].mean()
+year_10 = student_data.loc[student_data['year'] == 10, ['school_name', 'reading_score']].groupby('school_name')['reading_score'].mean()
+year_11 = student_data.loc[student_data['year'] == 11, ['school_name', 'reading_score']].groupby('school_name')['reading_score'].mean()
+year_12 = student_data.loc[student_data['year'] == 12, ['school_name', 'reading_score']].groupby('school_name')['reading_score'].mean()
+
+# the table, of school name and the year results of reading scors
+average_reading_scores = pd.DataFrame({
+    'Year 9': year_9,
+    'Year 10': year_10,
+    'Year 11': year_11,
+    'Year 12': year_12
+})
+
+average_reading_scores
+
+
+#Scores by School Spending, spending_summary
+
+import pandas as pd
+from pathlib import Path
+
+school_data_file = Path(r"C:\Users\Wolfred\Documents\Data Analysis Boot Camp\Week 4\PyCitySchools\Resources\schools_complete.csv")
+student_data_file = Path(r"C:\Users\Wolfred\Documents\Data Analysis Boot Camp\Week 4\PyCitySchools\Resources\students_complete.csv")
+
+school_data = pd.read_csv(school_data_file)
+student_data = pd.read_csv(student_data_file)
+
+# Merging both'school_name' column in both CSV files
+merged_data = pd.merge(student_data, school_data, on='school_name')
+
+# Calculating the Student Budget
+merged_data['Per Student Budget'] = merged_data['budget'] / merged_data['size']
+
+# adding in the ranges and labes 
+spending_bins = [0,585,630,645,680]
+spending_labels = ['<$585','$585-630','$630-645','$645-680']
+
+merged_data['Spending Ranges (Per Student)'] = pd.cut(merged_data['Per Student Budget'], bins=spending_bins, labels=spending_labels)
+
+# Calculating ave math & ave reading & % passing math & % passing reading & passing math + reading / 2
+summary_table = merged_data.groupby('Spending Ranges (Per Student)')[['maths_score', 'reading_score']].mean()
+summary_table['% Passing Maths'] = (merged_data[merged_data['maths_score'] >= 50].groupby('Spending Ranges (Per Student)')['maths_score'].count() / merged_data.groupby('Spending Ranges (Per Student)')['maths_score'].count()) * 100
+summary_table['% Passing Reading'] = (merged_data[merged_data['reading_score'] >= 50].groupby('Spending Ranges (Per Student)')['reading_score'].count() / merged_data.groupby('Spending Ranges (Per Student)')['reading_score'].count()) * 100
+summary_table['% Overall Passing'] = (summary_table['% Passing Maths'] + summary_table['% Passing Reading']) / 2
+
+# Rounding to 2 decimal places
+summary_table = summary_table.round(2)
+
+# the table
+summary_table = summary_table[['maths_score', 'reading_score', '% Passing Maths', '% Passing Reading', '% Overall Passing']]
+summary_table.columns = ['Average Maths Score', 'Average Reading Score', '% Passing Maths', '% Passing Reading', '% Overall Passing']
+summary_table
+
+
+#Scores by School Size, size_summary
+
+import pandas as pd
+from pathlib import Path
+
+school_data_file = Path(r"C:\Users\Wolfred\Documents\Data Analysis Boot Camp\Week 4\PyCitySchools\Resources\schools_complete.csv")
+student_data_file = Path(r"C:\Users\Wolfred\Documents\Data Analysis Boot Camp\Week 4\PyCitySchools\Resources\students_complete.csv")
+
+school_data = pd.read_csv(school_data_file)
+student_data = pd.read_csv(student_data_file)
+
+# Merging both'school_name' column in both CSV files
+merged_data = pd.merge(student_data, school_data, on='school_name')
+
+# adding in the ranges and labes, small 1000 or less, medium 1000-2000, Large 200-5000
+size_bins = [0,999,1999,5000]
+size_labels = ['Small (<1000)','Medium (1000-2000)','Large (2000-5000)']
+
+merged_data['School Size'] = pd.cut(merged_data['size'], bins=size_bins, labels=size_labels)
+
+# Calculating ave math & ave reading & % passing math & % passing reading & passing math + reading / 2
+summary_table = merged_data.groupby('School Size')[['maths_score', 'reading_score']].mean()
+summary_table['% Passing Maths'] = (merged_data[merged_data['maths_score'] >= 50].groupby('School Size')['maths_score'].count() / merged_data.groupby('School Size')['maths_score'].count()) * 100
+summary_table['% Passing Reading'] = (merged_data[merged_data['reading_score'] >= 50].groupby('School Size')['reading_score'].count() / merged_data.groupby('School Size')['reading_score'].count()) * 100
+summary_table['% Overall Passing'] = (summary_table['% Passing Maths'] + summary_table['% Passing Reading']) / 2
+
+# the table
+summary_table = summary_table[['maths_score', 'reading_score', '% Passing Maths', '% Passing Reading', '% Overall Passing']]
+summary_table.columns = ['Average Maths Score', 'Average Reading Score', '% Passing Maths', '% Passing Reading', '% Overall Passing']
+summary_table
+
+
+#Scores by School Type,type_summary
+
+import pandas as pd
+from pathlib import Path
+
+school_data_file = Path(r"C:\Users\Wolfred\Documents\Data Analysis Boot Camp\Week 4\PyCitySchools\Resources\schools_complete.csv")
+student_data_file = Path(r"C:\Users\Wolfred\Documents\Data Analysis Boot Camp\Week 4\PyCitySchools\Resources\students_complete.csv")
+
+school_data = pd.read_csv(school_data_file)
+student_data = pd.read_csv(student_data_file)
+
+#not getting right results, tryign without merging both'school_name' column in both CSV files, still wrong result
+
+# Calculating ave math & ave reading & % passing math & % passing reading & passing math + reading / 2
+summary_table = student_data.groupby('school_name')[['maths_score', 'reading_score']].mean()
+summary_table['% Passing Maths'] = (student_data[student_data['maths_score'] >= 50].groupby('school_name')['maths_score'].count() / student_data.groupby('school_name')['maths_score'].count()) * 100
+summary_table['% Passing Reading'] = (student_data[student_data['reading_score'] >= 50].groupby('school_name')['reading_score'].count() / student_data.groupby('school_name')['reading_score'].count()) * 100
+summary_table['% Overall Passing'] = (summary_table['% Passing Maths'] + summary_table['% Passing Reading']) / 2
+
+# because no merging need to calculate for each school, by renaming them. still not right results something wrong with the equasion.
+summary_table['type'] = school_data.set_index('school_name')['type']
+summary_table = summary_table.groupby('type')[['maths_score', 'reading_score', '% Passing Maths', '% Passing Reading', '% Overall Passing']].mean()
+summary_table.columns = ['Average Maths Score', 'Average Reading Score', '% Passing Maths', '% Passing Reading', '% Overall Passing']
+
+# the table
+summary_table
+
+
